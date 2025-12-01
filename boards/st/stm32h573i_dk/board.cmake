@@ -1,5 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
+if(CONFIG_BUILD_WITH_TFM)
+  set(TFM_FLASH_BASE_ADDRESS 0x0C000000)
+
+  # Flash merged TF-M + Zephyr binary
+  set_property(TARGET runners_yaml_props_target PROPERTY hex_file tfm_merged.hex)
+
+  if(CONFIG_HAS_FLASH_LOAD_OFFSET)
+    # Calculate NS hex address using PHYSICAL flash base (0x08000000)
+    # NOT the secure alias (0x0C000000), since hex files use physical addresses
+    MATH(EXPR TFM_HEX_BASE_ADDRESS_NS "0x08000000+${CONFIG_FLASH_LOAD_OFFSET}")
+  else()
+    set(TFM_HEX_BASE_ADDRESS_NS 0x08000000)
+  endif()
+endif()
+
 # keep first
 board_runner_args(stm32cubeprogrammer "--port=swd" "--reset-mode=hw")
 if(CONFIG_STM32_MEMMAP OR (CONFIG_XIP AND CONFIG_BOOTLOADER_MCUBOOT))
