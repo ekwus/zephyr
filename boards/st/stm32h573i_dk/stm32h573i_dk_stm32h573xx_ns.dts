@@ -100,14 +100,13 @@
         /*
          * NOTE: This layout matches TF-M's flash_layout.h expectations
          * TF-M places scratch, BL2 metadata, and storage BEFORE images
-         * This uses 224 KB overhead but ensures BL2 can find bootable images
          *
-         * Layout:
+         * Layout (updated for larger NS partition - 512KB for HTTPS server):
          * 0x00000-0x38000: BL2 + metadata + storage (224 KB)
          * 0x38000-0x68000: TF-M Secure primary (192 KB)
-         * 0x68000-0x98000: Zephyr NS primary (192 KB)
-         * 0x98000-0xC8000: TF-M Secure secondary (192 KB)
-         * 0xC8000-0xF8000: Zephyr NS secondary (192 KB)
+         * 0x68000-0xE8000: Zephyr NS primary (512 KB)
+         * 0xE8000-0x118000: TF-M Secure secondary (192 KB)
+         * 0x118000-0x198000: Zephyr NS secondary (512 KB)
          */
 
         /* BL2 + metadata + storage (not directly accessible) */
@@ -117,34 +116,34 @@
             read-only;
         };
 
-        /* Secure image primary slot - UPDATED to match TF-M @ 0x38000 */
+        /* Secure image primary slot - TF-M @ 0x38000 */
         slot0_partition: partition@38000 {
             label = "image-0";
             reg = <0x00038000 DT_SIZE_K(192)>;
         };
 
-        /* Non-secure image primary slot - UPDATED to match TF-M @ 0x68000 */
+        /* Non-secure image primary slot - 512KB for HTTPS server */
         slot0_ns_partition: partition@68000 {
             label = "image-0-nonsecure";
-            reg = <0x00068000 DT_SIZE_K(192)>;
+            reg = <0x00068000 DT_SIZE_K(512)>;
         };
 
-        /* Secure image secondary slot - UPDATED to match TF-M @ 0x98000 */
-        slot1_partition: partition@98000 {
+        /* Secure image secondary slot @ 0xE8000 */
+        slot1_partition: partition@e8000 {
             label = "image-1";
-            reg = <0x00098000 DT_SIZE_K(192)>;
+            reg = <0x000e8000 DT_SIZE_K(192)>;
         };
 
-        /* Non-secure image secondary slot - UPDATED to match TF-M @ 0xC8000 */
-        slot1_ns_partition: partition@c8000 {
+        /* Non-secure image secondary slot - 512KB */
+        slot1_ns_partition: partition@118000 {
             label = "image-1-nonsecure";
-            reg = <0x000c8000 DT_SIZE_K(192)>;
+            reg = <0x00118000 DT_SIZE_K(512)>;
         };
 
-        /* Storage partition (unused - TF-M manages storage internally) */
-        storage_partition: partition@f8000 {
+        /* Storage partition */
+        storage_partition: partition@198000 {
             label = "storage";
-            reg = <0x000f8000 DT_SIZE_K(32)>;  /* Reduced to 32 KB */
+            reg = <0x00198000 DT_SIZE_K(32)>;
         };
     };
 };
