@@ -75,6 +75,15 @@ if(CONFIG_BUILD_WITH_TFM)
   if(CONFIG_TFM_ISOLATION_LEVEL)
     list(APPEND TFM_CMAKE_ARGS -DTFM_ISOLATION_LEVEL=${CONFIG_TFM_ISOLATION_LEVEL})
   endif()
+
+  # Enable Memory-Mapped IOVEC so the secure-side crypto partition can read/write
+  # non-secure caller memory directly via SAU mapping, instead of copying through
+  # the small CRYPTO_IOVEC_BUFFER_SIZE scratch (5 KB default, 16 KB with our
+  # override). Required for AES-GCM decrypt of spec-max 16 KB TLS records — both
+  # the ciphertext input and plaintext output would otherwise need to fit
+  # simultaneously in the scratch (~32 KB), which won't fit in the 64 KB secure
+  # RAM. MM-IOVEC only works at TFM_ISOLATION_LEVEL=1, which this build uses.
+  list(APPEND TFM_CMAKE_ARGS -DPSA_FRAMEWORK_HAS_MM_IOVEC:BOOL=ON)
   if(CONFIG_TFM_ITS_NUM_ASSETS_OVERRIDE)
     list(APPEND TFM_CMAKE_ARGS -DITS_NUM_ASSETS=${CONFIG_TFM_ITS_NUM_ASSETS})
   endif()
